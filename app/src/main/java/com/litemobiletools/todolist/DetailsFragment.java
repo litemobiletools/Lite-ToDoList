@@ -1,4 +1,4 @@
-package com.nasheed.now;
+package com.litemobiletools.todolist;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;

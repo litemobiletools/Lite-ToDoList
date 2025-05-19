@@ -1,4 +1,4 @@
-package com.nasheed.now;
+package com.litemobiletools.todolist;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.socialbrowser.fragment2", appContext.getPackageName());
+        assertEquals("com.litemobiletools.todolist", appContext.getPackageName());
     }
 }

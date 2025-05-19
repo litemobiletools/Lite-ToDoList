@@ -1,4 +1,4 @@
-package com.nasheed.now;
+package com.litemobiletools.todolist;
 
 import android.content.ContentValues;
 import android.content.Context;
