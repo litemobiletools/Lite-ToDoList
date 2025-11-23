@@ -14,15 +14,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Load the default fragment (ButtonFragment)
-        if (savedInstanceState == null) {
-            loadFragment(new TitleFragment());
-        }
+//        if (savedInstanceState == null) {
+//            loadFragment(new TitleFragment());
+//        }
     }
 
-    private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .commit();
-    }
+//    private void loadFragment(Fragment fragment) {
+//        getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, fragment)
+//                .commit();
+//    }
 }
