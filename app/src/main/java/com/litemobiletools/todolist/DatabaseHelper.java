@@ -13,12 +13,10 @@ import java.util.Locale;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "mydatabase.db";
-    private static final int DATABASE_VERSION = 2;
-
+    private static final int DATABASE_VERSION = 1;
     private static final String TABLE_ITEMS = "items";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_NAME = "name";
-
     private static final String COLUMN_DATE = "date_Time";
     private static final String COLUMN_CHECKED = "is_checked";
 
