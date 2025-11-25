@@ -65,7 +65,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query(TABLE_ITEMS, null, COLUMN_ID + "=?", new String[]{String.valueOf(id)}, null, null, null);
     }
-
     public boolean updateItem(int id, String newName) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -83,14 +82,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int rows = db.delete(TABLE_ITEMS, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
         return rows > 0;
     }
-
-
-    public void updateItemCheckedStatus(int itemId, boolean isChecked) {
+    public void updateItemCheckedStatus(int itemId, int isChecked) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("is_checked", isChecked ? 1 : 0);
-        db.update("items", values, "id = ?", new String[]{String.valueOf(itemId)});
+        values.put("is_checked", isChecked);
+        db.update(TABLE_ITEMS, values, "id = ?", new String[]{String.valueOf(itemId)});
         db.close();
+    }
+
+    public int getUncheckedCount(String catName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM "+TABLE_ITEMS+" WHERE is_checked = 0 AND cat_name = ?",
+                new String[]{catName}
+        );
+
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+
+    //all count
+    public int getItemCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_ITEMS + " WHERE is_checked = 0", null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
+    }
+    //delete all
+    public void deleteAllByCategory(String catName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_ITEMS, "cat_name = ?", new String[]{catName});
     }
 
 }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:focusableInTouchMode="true"
     android:background="#F7F7F7">
 
     <!-- TOP HEADER WITH YELLOW CURVE -->
@@ -18,6 +19,7 @@
 
         <!-- Yellow Curved Background -->
         <View
+            android:id="@+id/myShapeView"
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:background="@drawable/top_curve" />
@@ -29,19 +31,19 @@
             android:layout_height="32dp"
             android:padding="6dp"
             android:layout_margin="20dp"
-            android:text="To DO List"
-            app:tint="#000000"
+            android:text="@string/app_name"
+            app:tint="#ffffff"
             android:layout_gravity="top|start" />
 
         <!-- Menu Button -->
         <ImageView
-            android:id="@+id/menuBtn"
+            android:id="@+id/shareBtn"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:padding="6dp"
             android:layout_margin="20dp"
             android:src="@drawable/ic_share"
-            app:tint="#000000"
+            app:tint="#ffffff"
             android:layout_gravity="top|end" />
 
         <LinearLayout
@@ -66,18 +68,20 @@
                 android:orientation="vertical"
                 android:layout_marginStart="20dp">
                 <TextView
+                    android:id="@+id/txtGreeting"
                     android:textSize="30sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hello Mr. Shahin"
-                    android:textColor="#000000"
+                    android:textColor="#ffffff"
                     android:textStyle="bold" />
                 <TextView
+                    android:id="@+id/txtCounter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="You have 12 wishes"
                     android:textSize="14sp"
-                    android:textColor="#444444" />
+                    android:textColor="#ffffff" />
             </LinearLayout>
         </LinearLayout>
 
@@ -191,6 +195,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/general_listText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 15 things to do"
@@ -200,7 +205,7 @@
                 </LinearLayout>
 
                 <Button
-                    android:onClick="details"
+                    android:onClick="general_list"
                     android:id="@+id/btnGeneralList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -242,6 +247,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/wish_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 12 wishes"
@@ -251,6 +257,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnWishList"
                     android:id="@+id/btnWishList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -292,6 +299,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/goto_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 8 places to go"
@@ -301,6 +309,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnGoToList"
                     android:id="@+id/btnGoToList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -342,6 +351,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/shopping_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 23 items to buy"
@@ -351,6 +361,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnShoppingList"
                     android:id="@+id/btnShoppingList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -391,6 +402,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/work_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 6 tasks at work"
@@ -400,6 +412,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnworkList"
                     android:id="@+id/btnworkList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -440,6 +453,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/personal_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 5 goals to achieve"
@@ -449,6 +463,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnPersonalList"
                     android:id="@+id/btnPersonalList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -489,15 +504,16 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/study_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 9 lessons to complete"
                         android:textSize="14sp"
                         android:textColor="#444444" />
-
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnStudyList"
                     android:id="@+id/btnStudyList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -538,6 +554,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/finance_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 4 bills to manage"
@@ -547,6 +564,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnFinanceList"
                     android:id="@+id/btnFinanceList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -587,15 +605,16 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/helth_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 3 health tasks today"
                         android:textSize="14sp"
                         android:textColor="#444444" />
-
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnHelthList"
                     android:id="@+id/btnHelthList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -636,6 +655,7 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/event_listtext"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="You have 2 events coming up"
@@ -645,6 +665,7 @@
                 </LinearLayout>
 
                 <Button
+                    android:onClick="btnEventList"
                     android:id="@+id/btnEventList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -9,6 +9,7 @@
 
     <!-- TOP HEADER WITH YELLOW CURVE -->
     <FrameLayout
+        android:elevation="4dp"
         android:id="@+id/topSection"
         android:layout_width="0dp"
         android:layout_height="180dp"
@@ -18,6 +19,7 @@
 
         <!-- Yellow Curved Background -->
         <View
+            android:id="@+id/myShapeView"
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:background="@drawable/top_curve" />
@@ -30,18 +32,18 @@
             android:padding="6dp"
             android:layout_margin="20dp"
             android:src="@drawable/ic_arrow_back"
-            app:tint="#000000"
+            app:tint="#ffffff"
             android:layout_gravity="top|start" />
 
         <!-- Menu Button -->
         <ImageView
-            android:id="@+id/menuBtn"
+            android:id="@+id/btnDeleteAll"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:padding="6dp"
             android:layout_margin="20dp"
-            android:src="@drawable/ic_more_vert"
-            app:tint="#000000"
+            android:src="@drawable/ic_delete"
+            app:tint="#ffffff"
             android:layout_gravity="top|end" />
 
         <LinearLayout
@@ -55,6 +57,7 @@
             android:elevation="4dp"
             android:gravity="center_vertical">
             <ImageView
+                android:id="@+id/cat_image"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:src="@drawable/wish" />
@@ -65,75 +68,31 @@
                 android:orientation="vertical"
                 android:layout_marginStart="20dp">
                 <TextView
+                    android:id="@+id/category_name"
                     android:textSize="30sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Wish List"
-                    android:textColor="#000000"
+                    android:textColor="#ffffff"
                     android:textStyle="bold" />
                 <TextView
+                    android:id="@+id/txtCounter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="You have 12 wishes"
                     android:textSize="14sp"
-                    android:textColor="#444444" />
+                    android:textColor="#EFEFEF" />
             </LinearLayout>
         </LinearLayout>
 
-
-        <!-- Profile Icon -->
-<!--        <ImageView-->
-<!--            android:id="@+id/userIcon"-->
-<!--            android:layout_width="70dp"-->
-<!--            android:layout_height="70dp"-->
-<!--            android:src="@drawable/general"-->
-<!--            android:layout_marginStart="25dp"-->
-<!--            android:layout_marginTop="70dp"-->
-<!--            android:layout_gravity="start|top" />        -->
-
-        <!-- Title -->
-<!--        <TextView-->
-<!--            android:id="@+id/taskTitle"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Personal"-->
-<!--            android:textSize="30sp"-->
-<!--            android:textStyle="bold"-->
-<!--            android:textColor="#333"-->
-<!--            android:layout_marginStart="25dp"-->
-<!--            android:layout_marginTop="150dp"-->
-<!--            android:layout_gravity="start|top" />-->
-
-        <!-- Sub Title / Task Count -->
-<!--        <TextView-->
-<!--            android:id="@+id/taskCount"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="8 Tasks"-->
-<!--            android:textSize="14sp"-->
-<!--            android:textColor="#666"-->
-<!--            android:layout_marginStart="25dp"-->
-<!--            android:layout_marginTop="190dp"-->
-<!--            android:layout_gravity="start|top" />-->
-
     </FrameLayout>
 
-
-    <!-- TASK LIST (Static for demo, you can use RecyclerView later) -->
-<!--    <LinearLayout-->
-<!--        android:id="@+id/taskListContainer"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        android:paddingHorizontal="20dp"-->
-<!--        android:paddingTop="20dp"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/topSection"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent">-->
-
-<!--        <ScrollView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content">-->
+    <ImageView
+        android:id="@+id/emptyviewId"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/empty"
+        android:visibility="gone"/>
 
     <ScrollView
         android:id="@+id/scrollArea"
@@ -154,77 +113,15 @@
             android:paddingTop="20dp"
             android:paddingBottom="100dp">
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Meet friends"
-            android:textSize="16sp"/>
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Change your picture"
-            android:textSize="16sp"/>
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Buy theatre ticket"
-            android:textSize="16sp"/>
+<!--        <CheckBox-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Meet friends"-->
+<!--            android:textSize="16sp"/>-->
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Go to gym"
-            android:textSize="16sp"/>
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add your portfolio"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Send project files"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Pay bills"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Watch Westworld"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Watch Westworld"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Watch Westworld"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Watch Westworld"
-            android:textSize="16sp"/>
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Watch Westworld 2"
-            android:textSize="16sp"/>
         </LinearLayout>
     </ScrollView>
 
