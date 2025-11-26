@@ -17,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_ITEMS = "todo_list";
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_NAME = "name";
-    private static final String COLUMN_DATE = "date_Time";
+    private static final String COLUMN_DATE = "date_time";
     private static final String COLUMN_CHECKED = "is_checked";
     private static final String COLUMN_CAT = "cat_name";
 

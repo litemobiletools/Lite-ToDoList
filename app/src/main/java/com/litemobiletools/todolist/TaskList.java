@@ -3,11 +3,14 @@ package com.litemobiletools.todolist;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -22,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Random;
 
@@ -127,6 +132,19 @@ public class TaskList extends AppCompatActivity {
         // Set random color dynamically
         drawable.setColor(randomColor);
 
+        category_name.setTextColor(getContrastColor(randomColor));
+        txtCounter = findViewById(R.id.txtCounter);
+        txtCounter.setTextColor(getContrastColor(randomColor));
+        btnDeleteAll.setColorFilter(getContrastColor(randomColor));
+        backBtn.setColorFilter(getContrastColor(randomColor));
+
+        FloatingActionButton addTaskBtn = findViewById(R.id.addTaskBtn);
+        addTaskBtn.setBackgroundTintList(ColorStateList.valueOf(randomColor));
+
+        // Set FloatingActionButton icon color (auto white/black)
+        int iconTint = getContrastColor(randomColor);
+        addTaskBtn.setImageTintList(ColorStateList.valueOf(iconTint));
+
     }
     public void create(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -186,12 +204,17 @@ public class TaskList extends AppCompatActivity {
                     int varId = cursor.getInt(cursor.getColumnIndex("id"));
                     String  name = cursor.getString(cursor.getColumnIndex("name"));
                     int isChecked = cursor.getInt(cursor.getColumnIndex("is_checked"));
+                    String  date_time = cursor.getString(cursor.getColumnIndex("date_time"));
 
                     //TEXT VIEW
                     CheckBox checkboxtext = new CheckBox(this);
 
-                    checkboxtext.setText(name);
-                    checkboxtext.setTextSize(16);
+//                    checkboxtext.setText(name + " " + date_time);
+                    checkboxtext.setTextSize(18);
+                    checkboxtext.setTextColor(Color.parseColor("#242424"));
+
+                    String finalText = name + "<br><small><font color='#888888'><i>" + date_time + "</i></font></small>";
+                    checkboxtext.setText(fromHtmlCompat(finalText));
 
                     // Set Checked or Unchecked based on DB value
                     checkboxtext.setChecked(isChecked == 1);
@@ -295,6 +318,21 @@ public class TaskList extends AppCompatActivity {
         builder.show();
     }
 
+    private int getContrastColor(int color) {
+        // Calculate luminance
+        double luminance = (0.299 * Color.red(color) +
+                0.587 * Color.green(color) +
+                0.114 * Color.blue(color)) / 255;
 
+        // If luminance is bright → return black text, otherwise white
+        return luminance > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+    public static Spanned fromHtmlCompat(String html) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+        } else {
+            return Html.fromHtml(html);
+        }
+    }
 
 }

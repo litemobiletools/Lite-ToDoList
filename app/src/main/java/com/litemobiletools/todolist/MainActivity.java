@@ -19,13 +19,14 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     public DatabaseHelper myDatabase;
+    ImageView shareBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         myDatabase = new DatabaseHelper(this);
 
-        ImageView shareBtn = findViewById(R.id.shareBtn);
+        shareBtn = findViewById(R.id.shareBtn);
         shareBtn.setOnClickListener(v -> {
             String shareMessage = "📌 *TO-DO List Lite*\n\n"
                     + "Stay organized every day with this simple and fast task manager.\n"
@@ -194,6 +195,11 @@ public class MainActivity extends AppCompatActivity {
         );
         // Set random color dynamically
         drawable.setColor(randomColor);
+        txtGreeting.setTextColor(getContrastColor(randomColor));
+        txtCounter.setTextColor(getContrastColor(randomColor));
+        shareBtn.setColorFilter(getContrastColor(randomColor));
+        TextView backBtn = findViewById(R.id.backBtn);
+        backBtn.setTextColor(getContrastColor(randomColor));
     }
     // Show confirmation dialog
     private void showExitDialog() {
@@ -210,4 +216,15 @@ public class MainActivity extends AppCompatActivity {
                 .setCancelable(false)
                 .show();
     }
+    //random text color
+    private int getContrastColor(int color) {
+        // Calculate luminance
+        double luminance = (0.299 * Color.red(color) +
+                0.587 * Color.green(color) +
+                0.114 * Color.blue(color)) / 255;
+
+        // If luminance is bright → return black text, otherwise white
+        return luminance > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+
 }

@@ -66,10 +66,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="20dp">
+                android:layout_marginStart="5dp">
                 <TextView
                     android:id="@+id/category_name"
-                    android:textSize="30sp"
+                    android:textSize="25sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Wish List"
@@ -80,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="You have 12 wishes"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textColor="#EFEFEF" />
             </LinearLayout>
         </LinearLayout>
@@ -113,14 +113,11 @@
             android:paddingTop="20dp"
             android:paddingBottom="100dp">
 
-
-
 <!--        <CheckBox-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="wrap_content"-->
 <!--            android:text="Meet friends"-->
 <!--            android:textSize="16sp"/>-->
-
 
         </LinearLayout>
     </ScrollView>
