@@ -39,13 +39,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertItem(String name, String cat_name) {
+    public long insertItem(String name, String cat_name, long dateTime) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
         // Get the current date and time
-        String currentDateAndTime = new SimpleDateFormat("hh:mma d-MMM-yy", Locale.getDefault()).format(new Date());
-        values.put(COLUMN_DATE, currentDateAndTime);
+//        String currentDateAndTime = new SimpleDateFormat("hh:mma d-MMM-yy", Locale.getDefault()).format(new Date());
+        values.put(COLUMN_DATE, dateTime);
         values.put(COLUMN_CHECKED, 0);
         values.put(COLUMN_CAT, cat_name);
         return db.insert(TABLE_ITEMS, null, values);
@@ -53,7 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getItemByCat(String id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.query(TABLE_ITEMS, null, COLUMN_CAT + "=?", new String[]{String.valueOf(id)}, null, null, null);
+        return db.query(TABLE_ITEMS, null, COLUMN_CAT + "=?", new String[]{String.valueOf(id)}, null, null, "date_time ASC");
     }
 
     public Cursor getAllItems() {
@@ -65,14 +65,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query(TABLE_ITEMS, null, COLUMN_ID + "=?", new String[]{String.valueOf(id)}, null, null, null);
     }
-    public boolean updateItem(int id, String newName) {
+    public boolean updateItem(int id, String newName, long datetimeMillis) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, newName);
 
         // Get the current date and time
-        String currentDateAndTime = new SimpleDateFormat("hh:mma d-MMM-yy", Locale.getDefault()).format(new Date());
-        values.put(COLUMN_DATE, currentDateAndTime);
+//        String currentDateAndTime = new SimpleDateFormat("hh:mma d-MMM-yy", Locale.getDefault()).format(new Date());
+        values.put(COLUMN_DATE, datetimeMillis);
 
         int rows = db.update(TABLE_ITEMS, values, COLUMN_ID + "=?", new String[]{String.valueOf(id)});
         return rows > 0;

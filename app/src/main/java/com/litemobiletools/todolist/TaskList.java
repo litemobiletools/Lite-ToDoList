@@ -2,6 +2,8 @@ package com.litemobiletools.todolist;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -28,6 +30,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Random;
 
 public class TaskList extends AppCompatActivity {
@@ -146,38 +151,109 @@ public class TaskList extends AppCompatActivity {
         addTaskBtn.setImageTintList(ColorStateList.valueOf(iconTint));
 
     }
+
     public void create(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add New Item");
 
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 20);
+
+        // Task input box
         final EditText input = new EditText(this);
         input.setHint("Enter item name");
+        layout.addView(input);
 
-        builder.setView(input);
+        // Date text
+        final TextView dateText = new TextView(this);
+        dateText.setText("Select Date");
+        dateText.setPadding(0, 30, 0, 10);
+        layout.addView(dateText);
 
-        builder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String name = input.getText().toString().trim();
-//                String cat_name = "general_list";
+        // Time text
+        final TextView timeText = new TextView(this);
+        timeText.setText("Select Time");
+        timeText.setPadding(0, 20, 0, 10);
+        layout.addView(timeText);
 
-                if (!name.isEmpty()) {
-                    long newItemId = myDatabase.insertItem(name, cat_name);
+        builder.setView(layout);
 
-                    if (newItemId != -1) {
-                        loadDataFromDatabase(cat_name); // Refresh list
-                    } else {
-                        Toast.makeText(TaskList.this, "Error inserting item", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(TaskList.this, "Please enter a name", Toast.LENGTH_SHORT).show();
-                }
+        // Calendar to hold selected date & time
+        final Calendar calendar = Calendar.getInstance();
+
+        // Pick Date
+        dateText.setOnClickListener(v -> {
+
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(TaskList.this,
+                    (view1, year1, month1, dayOfMonth) -> {
+                        calendar.set(Calendar.YEAR, year1);
+                        calendar.set(Calendar.MONTH, month1);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                        String selectedDate = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
+                        dateText.setText(selectedDate);
+                    }, year, month, day);
+            datePickerDialog.show();
+        });
+
+        // Pick Time
+        timeText.setOnClickListener(v -> {
+
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            int minute = calendar.get(Calendar.MINUTE);
+
+            TimePickerDialog timePickerDialog = new TimePickerDialog(TaskList.this,
+                    (view12, hourOfDay, minute1) -> {
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute1);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+
+                        String selectedTime = String.format("%02d:%02d", hourOfDay, minute1);
+                        timeText.setText(selectedTime);
+                    }, hour, minute, false);
+            timePickerDialog.show();
+        });
+
+
+        // Submit Button
+        builder.setPositiveButton("Submit", (dialog, which) -> {
+            String name = input.getText().toString().trim();
+            String date = dateText.getText().toString();
+            String time = timeText.getText().toString();
+
+            if (name.isEmpty()) {
+                Toast.makeText(TaskList.this, "Please enter a name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Save milliseconds
+            long datetimeMillis;
+            // if date or time not picked → use current time
+            if (date.equals("Select Date") || time.equals("Select Time")) {
+                datetimeMillis = System.currentTimeMillis(); // current time
+            }else{
+                datetimeMillis = calendar.getTimeInMillis();
+            }
+
+            long newItemId = myDatabase.insertItem(name, cat_name, datetimeMillis);
+
+            if (newItemId != -1) {
+                loadDataFromDatabase(cat_name);
+            } else {
+                Toast.makeText(TaskList.this, "Error inserting item", Toast.LENGTH_SHORT).show();
             }
         });
 
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
+
 
     // main for loop main content
     @SuppressLint("Range")
@@ -204,7 +280,7 @@ public class TaskList extends AppCompatActivity {
                     int varId = cursor.getInt(cursor.getColumnIndex("id"));
                     String  name = cursor.getString(cursor.getColumnIndex("name"));
                     int isChecked = cursor.getInt(cursor.getColumnIndex("is_checked"));
-                    String  date_time = cursor.getString(cursor.getColumnIndex("date_time"));
+                    long date_time = cursor.getLong(cursor.getColumnIndex("date_time"));
 
                     //TEXT VIEW
                     CheckBox checkboxtext = new CheckBox(this);
@@ -213,7 +289,8 @@ public class TaskList extends AppCompatActivity {
                     checkboxtext.setTextSize(18);
                     checkboxtext.setTextColor(Color.parseColor("#242424"));
 
-                    String finalText = name + "<br><small><font color='#888888'><i>" + date_time + "</i></font></small>";
+                    String dateText = formatDate(date_time);
+                    String finalText = name + "<br><small><font color='#888888'><i>" + dateText + "</i></font></small>";
                     checkboxtext.setText(fromHtmlCompat(finalText));
 
                     // Set Checked or Unchecked based on DB value
@@ -238,7 +315,7 @@ public class TaskList extends AppCompatActivity {
                     });
 
                     checkboxtext.setOnLongClickListener(v -> {
-                        showOptionsDialog(varId, name, cat_name);
+                        showOptionsDialog(varId, name, cat_name, date_time);
                         return true;
                     });
 
@@ -255,30 +332,90 @@ public class TaskList extends AppCompatActivity {
             emptyviewId.setVisibility(View.GONE);
         }
     }
-    private void showUpdateDialog(int id, String oldName) {
+    private void showUpdateDialog(int id, String oldName, long oldDatetimeMillis) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Update Item");
 
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 20);
+
+        // Name EditText
         final EditText input = new EditText(this);
         input.setText(oldName);
-        builder.setView(input);
+        layout.addView(input);
 
+        // Date TextView
+        final TextView dateText = new TextView(this);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(oldDatetimeMillis); // set existing date/time
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        dateText.setText(String.format("%02d/%02d/%04d", day, month + 1, year));
+        dateText.setPadding(0, 20, 0, 10);
+        layout.addView(dateText);
+
+        // Time TextView
+        final TextView timeText = new TextView(this);
+        timeText.setText(String.format("%02d:%02d", hour, minute));
+        timeText.setPadding(0, 10, 0, 20);
+        layout.addView(timeText);
+
+        builder.setView(layout);
+
+        // Pick Date
+        dateText.setOnClickListener(v -> {
+            DatePickerDialog datePicker = new DatePickerDialog(TaskList.this,
+                    (view, y, m, d) -> {
+                        calendar.set(Calendar.YEAR, y);
+                        calendar.set(Calendar.MONTH, m);
+                        calendar.set(Calendar.DAY_OF_MONTH, d);
+                        dateText.setText(String.format("%02d/%02d/%04d", d, m + 1, y));
+                    }, year, month, day);
+            datePicker.show();
+        });
+
+        // Pick Time
+        timeText.setOnClickListener(v -> {
+            TimePickerDialog timePicker = new TimePickerDialog(TaskList.this,
+                    (view, h, min) -> {
+                        calendar.set(Calendar.HOUR_OF_DAY, h);
+                        calendar.set(Calendar.MINUTE, min);
+                        calendar.set(Calendar.SECOND, 0);
+                        calendar.set(Calendar.MILLISECOND, 0);
+                        timeText.setText(String.format("%02d:%02d", h, min));
+                    }, hour, minute, false);
+            timePicker.show();
+        });
+
+        // Update button
         builder.setPositiveButton("Update", (dialog, which) -> {
             String newName = input.getText().toString().trim();
-            if (!newName.isEmpty()) {
-                boolean updated = myDatabase.updateItem(id, newName);
 
-                if (updated) {
-                    loadDataFromDatabase(cat_name); // refresh
-                } else {
-                    Toast.makeText(TaskList.this, "Update failed!", Toast.LENGTH_SHORT).show();
-                }
+            if (newName.isEmpty()) {
+                Toast.makeText(TaskList.this, "Please enter a name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            long newDatetimeMillis = calendar.getTimeInMillis();
+
+            boolean updated = myDatabase.updateItem(id, newName, newDatetimeMillis);
+
+            if (updated) {
+                loadDataFromDatabase(cat_name);
+            } else {
+                Toast.makeText(TaskList.this, "Update failed!", Toast.LENGTH_SHORT).show();
             }
         });
 
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
+
 
     private void showDeleteDialog(int id, String cat_name) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -299,12 +436,12 @@ public class TaskList extends AppCompatActivity {
         builder.show();
     }
 
-    private void showOptionsDialog(int id, String name, String cat_name) {
+    private void showOptionsDialog(int id, String name, String cat_name, long oldDatetimeMillis) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Choose an option");
 
         builder.setPositiveButton("Update", (dialog, which) -> {
-            showUpdateDialog(id, name);     // your update method
+            showUpdateDialog(id, name, oldDatetimeMillis);     // your update method
         });
 
         builder.setNegativeButton("Delete", (dialog, which) -> {
@@ -327,6 +464,7 @@ public class TaskList extends AppCompatActivity {
         // If luminance is bright → return black text, otherwise white
         return luminance > 0.5 ? Color.BLACK : Color.WHITE;
     }
+    //21 html formate
     public static Spanned fromHtmlCompat(String html) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
@@ -334,5 +472,42 @@ public class TaskList extends AppCompatActivity {
             return Html.fromHtml(html);
         }
     }
+    //    date formate
+    public String formatDate(long timeInMillis) {
+        Calendar inputCal = Calendar.getInstance();
+        inputCal.setTimeInMillis(timeInMillis);
+
+        Calendar todayCal = Calendar.getInstance();
+
+        // Set to date-only
+        Calendar inputDate = (Calendar) inputCal.clone();
+        inputDate.set(Calendar.HOUR_OF_DAY, 0);
+        inputDate.set(Calendar.MINUTE, 0);
+        inputDate.set(Calendar.SECOND, 0);
+        inputDate.set(Calendar.MILLISECOND, 0);
+
+        Calendar todayDate = (Calendar) todayCal.clone();
+        todayDate.set(Calendar.HOUR_OF_DAY, 0);
+        todayDate.set(Calendar.MINUTE, 0);
+        todayDate.set(Calendar.SECOND, 0);
+        todayDate.set(Calendar.MILLISECOND, 0);
+
+        long diff = (inputDate.getTimeInMillis() - todayDate.getTimeInMillis()) / (1000 * 60 * 60 * 24);
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.getDefault());
+
+        if (diff == 0) {
+            return "Today, " + timeFormat.format(inputCal.getTime());
+        } else if (diff == 1) {
+            return "Tomorrow, " + timeFormat.format(inputCal.getTime());
+        } else if (diff < 7) {
+            SimpleDateFormat weekFormat = new SimpleDateFormat("EEEE, h:mm a", Locale.getDefault());
+            return weekFormat.format(inputCal.getTime());
+        } else {
+            SimpleDateFormat fullFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.getDefault());
+            return fullFormat.format(inputCal.getTime());
+        }
+    }
+
 
 }
