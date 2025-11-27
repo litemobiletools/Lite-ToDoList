@@ -1,8 +1,13 @@
 package com.litemobiletools.todolist;
 
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -20,6 +26,8 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
     public DatabaseHelper myDatabase;
     ImageView shareBtn;
+    private static final int NOTIFICATION_PERMISSION_CODE = 1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        createNotificationChannel(); // call once on app start
+        requestNotificationPermission();  // <-- IMPORTANT
     }
     public void general_list(View view) {
         Intent intense = new Intent(MainActivity.this, TaskList.class);
@@ -103,8 +113,6 @@ public class MainActivity extends AppCompatActivity {
         intense.putExtra("catName", "event_list");
         startActivity(intense);
     }
-
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -226,5 +234,56 @@ public class MainActivity extends AppCompatActivity {
         // If luminance is bright → return black text, otherwise white
         return luminance > 0.5 ? Color.BLACK : Color.WHITE;
     }
+    //notification system
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Task Reminder";
+            String description = "Channel for task reminders";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("task_channel", name, importance);
+            channel.setDescription(description);
 
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) manager.createNotificationChannel(channel);
+        }
+    }
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Show explanation BEFORE asking the permission
+                showNotificationPermissionExplanation();
+            }
+        }
+    }
+    @SuppressWarnings("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Notifications enabled!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private void showNotificationPermissionExplanation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Enable Notifications")
+                .setMessage("We use notifications only to remind you about tasks. We do not collect or share any data.")
+                .setPositiveButton("Allow", (dialog, which) -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // Safe: Only Android 13+ needs POST_NOTIFICATIONS
+                        requestPermissions(
+                                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                NOTIFICATION_PERMISSION_CODE
+                        );
+                    }
+                })
+                .setNegativeButton("No Thanks", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
 }

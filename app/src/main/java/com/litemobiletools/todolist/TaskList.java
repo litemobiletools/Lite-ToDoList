@@ -1,16 +1,22 @@
 package com.litemobiletools.todolist;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
@@ -32,8 +38,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+
+import kotlinx.coroutines.scheduling.Task;
 
 public class TaskList extends AppCompatActivity {
     public DatabaseHelper myDatabase;
@@ -103,6 +112,19 @@ public class TaskList extends AppCompatActivity {
                     .setMessage("Are you sure you want to delete all tasks in this category?")
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton("Yes", (dialog, which) -> {
+
+                        // 1. Get all tasks in this category
+                        Cursor cursor = myDatabase.getItemByCat(cat_name);
+                        if (cursor != null && cursor.moveToFirst()) {
+                            int idIndex = cursor.getColumnIndex("id"); // <-- make sure "id" is correct
+                            if (idIndex != -1) {
+                                do {
+                                    int taskId = cursor.getInt(idIndex);
+                                    cancelScheduledNotification(taskId);
+                                } while (cursor.moveToNext());
+                            }
+                            cursor.close();
+                        }
 
                         // DELETE ALL
                         myDatabase.deleteAllByCategory(cat_name);  // <-- category name
@@ -244,6 +266,8 @@ public class TaskList extends AppCompatActivity {
             long newItemId = myDatabase.insertItem(name, cat_name, datetimeMillis);
 
             if (newItemId != -1) {
+                // schedule using newItemId and stored datetimeMillis
+                scheduleNotification(newItemId, name, datetimeMillis);
                 loadDataFromDatabase(cat_name);
             } else {
                 Toast.makeText(TaskList.this, "Error inserting item", Toast.LENGTH_SHORT).show();
@@ -253,7 +277,6 @@ public class TaskList extends AppCompatActivity {
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
-
 
     // main for loop main content
     @SuppressLint("Range")
@@ -278,7 +301,7 @@ public class TaskList extends AppCompatActivity {
             if (cursor.moveToFirst()) {
                 do {
                     int varId = cursor.getInt(cursor.getColumnIndex("id"));
-                    String  name = cursor.getString(cursor.getColumnIndex("name"));
+                    String name = cursor.getString(cursor.getColumnIndex("name"));
                     int isChecked = cursor.getInt(cursor.getColumnIndex("is_checked"));
                     long date_time = cursor.getLong(cursor.getColumnIndex("date_time"));
 
@@ -308,8 +331,12 @@ public class TaskList extends AppCompatActivity {
 
                         if (newValue == 1) {
                             checkboxtext.setPaintFlags(checkboxtext.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                            //When updating a task's datetime/name
+                            cancelScheduledNotification(varId);
                         } else {
                             checkboxtext.setPaintFlags(checkboxtext.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                            //schedul notfication
+                            scheduleNotification(varId, name, date_time);
                         }
 
                     });
@@ -403,9 +430,12 @@ public class TaskList extends AppCompatActivity {
 
             long newDatetimeMillis = calendar.getTimeInMillis();
 
+            //When updating a task's datetime/name
+            cancelScheduledNotification(id);
             boolean updated = myDatabase.updateItem(id, newName, newDatetimeMillis);
 
             if (updated) {
+                scheduleNotification(id, newName, newDatetimeMillis);
                 loadDataFromDatabase(cat_name);
             } else {
                 Toast.makeText(TaskList.this, "Update failed!", Toast.LENGTH_SHORT).show();
@@ -416,7 +446,6 @@ public class TaskList extends AppCompatActivity {
         builder.show();
     }
 
-
     private void showDeleteDialog(int id, String cat_name) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Item?");
@@ -426,6 +455,7 @@ public class TaskList extends AppCompatActivity {
             boolean deleted = myDatabase.deleteItem(id);
 
             if (deleted) {
+                cancelScheduledNotification(id);
                 loadDataFromDatabase(cat_name); // refresh
             } else {
                 Toast.makeText(TaskList.this, "Delete failed!", Toast.LENGTH_SHORT).show();
@@ -508,6 +538,57 @@ public class TaskList extends AppCompatActivity {
             return fullFormat.format(inputCal.getTime());
         }
     }
+    //notification system
+    private void scheduleNotification(long taskId, String taskName, long timeMillis) {
 
+        // 1️⃣ Check exact alarm permission for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            if (!am.canScheduleExactAlarms()) {
+                Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(intent);
+                return; // stop here → cannot schedule alarm
+            }
+        }
+
+        if (timeMillis <= System.currentTimeMillis()) {
+            // do not schedule past alarms
+            return;
+        }
+
+        Intent intent = new Intent(this, TaskNotificationReceiver.class);
+        intent.putExtra("task_name", taskName);
+        intent.putExtra("task_id", (int) taskId);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                (int) taskId, // requestCode -> use task id (cast to int)
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMillis, pendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeMillis, pendingIntent);
+            }
+        }
+    }
+    private void cancelScheduledNotification(long taskId) {
+        Intent intent = new Intent(this, TaskNotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this,
+                (int) taskId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+        }
+    }
 
 }
